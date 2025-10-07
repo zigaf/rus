@@ -11,15 +11,108 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// Test database connection
+// Test database connection and initialize tables
 async function testDatabaseConnection() {
   try {
     const client = await pool.connect();
     console.log('✅ Database connected successfully');
+    
+    // Initialize tables if they don't exist
+    await initializeTables(client);
+    
     client.release();
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
     console.log('🔧 Using mock data instead');
+  }
+}
+
+// Initialize database tables
+async function initializeTables(client) {
+  try {
+    console.log('🔧 Initializing database tables...');
+    
+    // Create users table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "User" (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'ADMIN',
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Create articles table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "Article" (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(500) NOT NULL,
+        excerpt TEXT NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        image VARCHAR(500),
+        content JSONB NOT NULL,
+        date VARCHAR(100) NOT NULL,
+        "readTime" VARCHAR(50) NOT NULL,
+        published BOOLEAN DEFAULT false,
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Create gallery images table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "GalleryImage" (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255),
+        description TEXT,
+        "imageUrl" VARCHAR(500) NOT NULL,
+        "imageType" VARCHAR(50) DEFAULT 'image',
+        "fileSize" INTEGER,
+        width INTEGER,
+        height INTEGER,
+        "order" INTEGER DEFAULT 0,
+        published BOOLEAN DEFAULT true,
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Create contact messages table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "ContactMessage" (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        message TEXT NOT NULL,
+        read BOOLEAN DEFAULT false,
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Create default admin user if not exists
+    const existingAdmin = await client.query('SELECT id FROM "User" WHERE email = $1', ['admin@ruslana.com']);
+    if (existingAdmin.rows.length === 0) {
+      await client.query(`
+        INSERT INTO "User" (email, password, name, role, "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [
+        'admin@ruslana.com',
+        'admin123',
+        'Admin User',
+        'ADMIN',
+        new Date(),
+        new Date()
+      ]);
+      console.log('✅ Default admin user created');
+    }
+    
+    console.log('✅ Database tables initialized successfully');
+  } catch (error) {
+    console.error('⚠️ Could not initialize tables:', error.message);
   }
 }
 
