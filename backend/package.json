@@ -5,8 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "echo 'No build needed for SQLite server'",
-    "start": "node src/sqlite-server.js",
-    "dev": "node src/sqlite-server.js",
+    "start": "node src/main-server.js",
+    "dev": "node src/main-server.js",
     "migrate": "npx prisma migrate dev",
     "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",

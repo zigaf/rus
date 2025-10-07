@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DataService, Article } from '../../services/data.service';
+import { ApiService, Article } from '../../services/api.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-article',
@@ -15,13 +17,33 @@ export class ArticleComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private dataService: DataService
+    private apiService: ApiService
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      const id = +params['id'];
-      this.article = this.dataService.getArticleById(id) || this.getDefaultArticleById(id);
+      const idOrSlug = params['id']; // Can be either ID or slug
+      this.loadArticle(idOrSlug);
+    });
+  }
+
+  loadArticle(idOrSlug: string) {
+    // First try to load from API
+    this.apiService.getArticle(+idOrSlug || idOrSlug as any).pipe(
+      catchError((error) => {
+        console.error('Error loading article:', error);
+        return of(null);
+      })
+    ).subscribe(article => {
+      if (article) {
+        this.article = article;
+      } else {
+        // Fallback to default article by ID
+        const id = +idOrSlug;
+        if (!isNaN(id)) {
+          this.article = this.getDefaultArticleById(id);
+        }
+      }
     });
   }
 

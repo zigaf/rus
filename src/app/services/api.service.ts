@@ -6,6 +6,7 @@ import { tap, catchError } from 'rxjs/operators';
 export interface Article {
   id: number;
   title: string;
+  slug?: string;
   excerpt: string;
   category: string;
   image?: string;
