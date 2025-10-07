@@ -126,8 +126,12 @@ export class ApiService {
 
   // Articles
   getArticles(published: boolean = true): Observable<Article[]> {
-    const params = published ? '?published=true' : '';
-    return this.http.get<Article[]>(`${this.API_URL}/articles${params}`);
+    if (published) {
+      return this.http.get<Article[]>(`${this.API_URL}/articles`);
+    } else {
+      // For admin panel, get all articles
+      return this.http.get<Article[]>(`${this.API_URL}/admin/articles`);
+    }
   }
 
   getArticle(id: number): Observable<Article> {
@@ -152,8 +156,12 @@ export class ApiService {
 
   // Gallery
   getGalleryImages(published: boolean = true): Observable<GalleryImage[]> {
-    const params = published ? '?published=true' : '';
-    return this.http.get<GalleryImage[]>(`${this.API_URL}/gallery${params}`);
+    if (published) {
+      return this.http.get<GalleryImage[]>(`${this.API_URL}/gallery`);
+    } else {
+      // For admin panel, get all gallery images
+      return this.http.get<GalleryImage[]>(`${this.API_URL}/admin/gallery`);
+    }
   }
 
   getGalleryImage(id: number): Observable<GalleryImage> {

@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 
 const app = express();
@@ -9,6 +12,42 @@ const PORT = process.env.PORT || 3001;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// File upload configuration
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'));
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: fileFilter
 });
 
 // Test database connection and initialize tables
@@ -127,6 +166,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploaded files
+app.use('/uploads', express.static(uploadDir));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -185,11 +227,14 @@ app.get('/api/articles', async (req, res) => {
     const result = await pool.query('SELECT * FROM "Article" WHERE published = true ORDER BY "createdAt" DESC');
     
     if (result.rows.length > 0) {
+      console.log('✅ Retrieved', result.rows.length, 'articles from database');
       res.json(result.rows);
       return;
+    } else {
+      console.log('📝 No published articles found in database');
     }
   } catch (error) {
-    console.log('📝 Using mock articles (database not available)');
+    console.log('📝 Using mock articles (database not available):', error.message);
   }
   
   // Fallback to mock data
@@ -251,6 +296,27 @@ app.get('/api/articles', async (req, res) => {
   ];
   
   res.json(articles);
+});
+
+// Admin endpoint - get all articles (including unpublished)
+app.get('/api/admin/articles', async (req, res) => {
+  try {
+    // Try to get all articles from database
+    const result = await pool.query('SELECT * FROM "Article" ORDER BY "createdAt" DESC');
+    
+    if (result.rows.length > 0) {
+      console.log('✅ Retrieved', result.rows.length, 'articles from database (admin)');
+      res.json(result.rows);
+      return;
+    } else {
+      console.log('📝 No articles found in database (admin)');
+      res.json([]);
+      return;
+    }
+  } catch (error) {
+    console.log('📝 Using mock articles (database not available - admin):', error.message);
+    res.json([]);
+  }
 });
 
 // Get single article
@@ -433,6 +499,27 @@ app.get('/api/gallery', async (req, res) => {
   res.json(galleryImages);
 });
 
+// Admin endpoint - get all gallery images (including unpublished)
+app.get('/api/admin/gallery', async (req, res) => {
+  try {
+    // Try to get all gallery images from database
+    const result = await pool.query('SELECT * FROM "GalleryImage" ORDER BY "order" ASC, "createdAt" DESC');
+    
+    if (result.rows.length > 0) {
+      console.log('✅ Retrieved', result.rows.length, 'gallery images from database (admin)');
+      res.json(result.rows);
+      return;
+    } else {
+      console.log('📝 No gallery images found in database (admin)');
+      res.json([]);
+      return;
+    }
+  } catch (error) {
+    console.log('📝 Using mock gallery (database not available - admin):', error.message);
+    res.json([]);
+  }
+});
+
 // Get single gallery image
 app.get('/api/gallery/:id', async (req, res) => {
   const imageId = parseInt(req.params.id);
@@ -496,36 +583,70 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // Upload endpoints
-app.post('/api/upload/single', (req, res) => {
-  // For now, return a mock response since we don't have file upload configured
-  console.log('📁 File upload requested (mock response)');
-  
-  res.json({
-    success: true,
-    message: 'File upload endpoint available',
-    url: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
-    filename: 'uploaded-file.jpg'
-  });
+app.post('/api/upload/single', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    
+    console.log('✅ File uploaded successfully:', req.file.filename);
+
+    res.json({
+      success: true,
+      message: 'File uploaded successfully',
+      url: fileUrl,
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
+  } catch (error) {
+    console.error('❌ File upload error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'File upload failed',
+      error: error.message
+    });
+  }
 });
 
-app.post('/api/upload/multiple', (req, res) => {
-  // For now, return a mock response since we don't have file upload configured
-  console.log('📁 Multiple files upload requested (mock response)');
-  
-  res.json({
-    success: true,
-    message: 'Multiple files upload endpoint available',
-    files: [
-      {
-        url: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
-        filename: 'uploaded-file-1.jpg'
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
-        filename: 'uploaded-file-2.jpg'
-      }
-    ]
-  });
+app.post('/api/upload/multiple', upload.array('files', 10), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No files uploaded'
+      });
+    }
+
+    const files = req.files.map(file => ({
+      url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
+      filename: file.filename,
+      originalName: file.originalname,
+      size: file.size,
+      mimetype: file.mimetype
+    }));
+
+    console.log('✅ Multiple files uploaded successfully:', files.length);
+
+    res.json({
+      success: true,
+      message: `${files.length} files uploaded successfully`,
+      files: files
+    });
+  } catch (error) {
+    console.error('❌ Multiple files upload error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Files upload failed',
+      error: error.message
+    });
+  }
 });
 
 // Gallery management endpoints
