@@ -81,7 +81,7 @@ export class AdminComponent implements OnInit {
       await this.loadArticles();
       await this.loadGalleryImages();
       await this.checkDatabaseStatus();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading user data:', error);
       this.logout();
     }
@@ -90,9 +90,9 @@ export class AdminComponent implements OnInit {
   async checkDatabaseStatus() {
     try {
       this.databaseStatus = await this.apiService.getDatabaseStatus().toPromise();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking database status:', error);
-      this.databaseStatus = { connected: false, error: error.message };
+      this.databaseStatus = { connected: false, error: error?.message || 'Unknown error' };
     }
   }
 
@@ -135,7 +135,7 @@ export class AdminComponent implements OnInit {
   async loadArticles() {
     try {
       this.articles = await this.apiService.getArticles(false).toPromise() || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading articles:', error);
     }
   }
@@ -166,7 +166,7 @@ export class AdminComponent implements OnInit {
       }
       await this.loadArticles();
       this.resetArticleForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving article:', error);
       this.alertService.error(
         'Помилка збереження',
@@ -243,7 +243,7 @@ export class AdminComponent implements OnInit {
   async loadGalleryImages() {
     try {
       this.galleryImages = await this.apiService.getGalleryImages(false).toPromise() || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading gallery images:', error);
     }
   }
@@ -274,7 +274,7 @@ export class AdminComponent implements OnInit {
       }
       await this.loadGalleryImages();
       this.resetGalleryForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving gallery image:', error);
       this.alertService.error(
         'Помилка збереження',
