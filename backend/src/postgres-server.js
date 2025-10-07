@@ -180,6 +180,28 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Database initialization endpoint
+app.post('/api/init-db', async (req, res) => {
+  try {
+    console.log('🔧 Manual database initialization requested');
+    const client = await pool.connect();
+    await initializeTables(client);
+    client.release();
+    
+    res.json({
+      success: true,
+      message: 'Database initialized successfully'
+    });
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Database initialization failed',
+      error: error.message
+    });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
