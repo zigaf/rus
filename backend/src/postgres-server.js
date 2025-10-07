@@ -214,23 +214,82 @@ app.get('/health', (req, res) => {
 
 // Database initialization endpoint
 app.post('/api/init-db', async (req, res) => {
+  let client;
   try {
     console.log('🔧 Manual database initialization requested');
-    const client = await pool.connect();
+    
+    // Test database connection first
+    client = await pool.connect();
+    console.log('✅ Database connection established');
+    
+    // Initialize tables
     await initializeTables(client);
-    client.release();
     
     res.json({
       success: true,
       message: 'Database initialized successfully'
     });
   } catch (error) {
-    console.error('❌ Database initialization failed:', error.message);
+    console.error('❌ Database initialization failed:', error);
     res.status(500).json({
       success: false,
       message: 'Database initialization failed',
+      error: error.message,
+      details: error.toString()
+    });
+  } finally {
+    if (client) {
+      client.release();
+    }
+  }
+});
+
+// Database status endpoint
+app.get('/api/db-status', async (req, res) => {
+  let client;
+  try {
+    client = await pool.connect();
+    
+    // Check if tables exist
+    const tablesCheck = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('User', 'Article', 'GalleryImage', 'ContactMessage')
+    `);
+    
+    const existingTables = tablesCheck.rows.map(row => row.table_name);
+    
+    // Count records in each table
+    const counts = {};
+    for (const table of existingTables) {
+      try {
+        const result = await client.query(`SELECT COUNT(*) FROM "${table}"`);
+        counts[table] = parseInt(result.rows[0].count);
+      } catch (error) {
+        counts[table] = 0;
+      }
+    }
+    
+    res.json({
+      success: true,
+      connected: true,
+      tables: existingTables,
+      counts: counts,
+      totalTables: existingTables.length,
+      expectedTables: 4
+    });
+  } catch (error) {
+    console.error('❌ Database status check failed:', error);
+    res.status(500).json({
+      success: false,
+      connected: false,
       error: error.message
     });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 });
 

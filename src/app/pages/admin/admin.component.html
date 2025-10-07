@@ -91,17 +91,40 @@
       <!-- Database Status -->
       <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
         <div class="flex items-center justify-between">
-          <div>
+          <div class="flex-1">
             <h3 class="text-lg font-semibold text-warm-gray-900">База даних</h3>
-            <p class="text-sm text-warm-gray-600">Створити таблиці (тільки якщо їх немає)</p>
+            <div class="text-sm text-warm-gray-600 mt-1">
+              <div *ngIf="databaseStatus?.connected" class="flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                Підключено
+                <span *ngIf="databaseStatus?.totalTables" class="ml-2">
+                  ({{ databaseStatus.totalTables }}/{{ databaseStatus.expectedTables }} таблиць)
+                </span>
+              </div>
+              <div *ngIf="!databaseStatus?.connected" class="flex items-center">
+                <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                Не підключено
+              </div>
+            </div>
+            <div *ngIf="databaseStatus?.tables?.length > 0" class="text-xs text-gray-500 mt-1">
+              Таблиці: {{ databaseStatus.tables.join(', ') }}
+            </div>
           </div>
-          <button 
-            (click)="initializeDatabase()"
-            [disabled]="loading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            <span *ngIf="!loading">Створити таблиці</span>
-            <span *ngIf="loading">Завантаження...</span>
-          </button>
+          <div class="flex space-x-2">
+            <button 
+              (click)="checkDatabaseStatus()"
+              [disabled]="loading"
+              class="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm">
+              Перевірити
+            </button>
+            <button 
+              (click)="initializeDatabase()"
+              [disabled]="loading"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              <span *ngIf="!loading">Створити таблиці</span>
+              <span *ngIf="loading">Завантаження...</span>
+            </button>
+          </div>
         </div>
       </div>
 

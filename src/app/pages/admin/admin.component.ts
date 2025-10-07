@@ -54,6 +54,7 @@ export class AdminComponent implements OnInit {
   // UI state
   activeTab: 'articles' | 'gallery' | 'login' = 'login';
   loading = false;
+  databaseStatus: any = null;
 
   constructor(
     private apiService: ApiService,
@@ -79,9 +80,19 @@ export class AdminComponent implements OnInit {
       this.currentUser = response?.user;
       await this.loadArticles();
       await this.loadGalleryImages();
+      await this.checkDatabaseStatus();
     } catch (error) {
       console.error('Error loading user data:', error);
       this.logout();
+    }
+  }
+
+  async checkDatabaseStatus() {
+    try {
+      this.databaseStatus = await this.apiService.getDatabaseStatus().toPromise();
+    } catch (error) {
+      console.error('Error checking database status:', error);
+      this.databaseStatus = { connected: false, error: error.message };
     }
   }
 
@@ -324,20 +335,30 @@ export class AdminComponent implements OnInit {
   async initializeDatabase() {
     this.loading = true;
     try {
-      await this.apiService.initializeDatabase().toPromise();
-      this.alertService.success(
-        'База даних ініціалізована',
-        'Таблиці успішно створені в базі даних'
-      );
+      const response = await this.apiService.initializeDatabase().toPromise();
       
-      // Reload data after initialization
-      await this.loadArticles();
-      await this.loadGalleryImages();
-    } catch (error) {
+      if (response.success) {
+        this.alertService.success(
+          'База даних ініціалізована',
+          'Таблиці успішно створені в базі даних'
+        );
+        
+        // Reload data after initialization
+        await this.checkDatabaseStatus();
+        await this.loadArticles();
+        await this.loadGalleryImages();
+      } else {
+        this.alertService.error(
+          'Помилка ініціалізації',
+          response.message || 'Не вдалося ініціалізувати базу даних'
+        );
+      }
+    } catch (error: any) {
       console.error('Error initializing database:', error);
+      const errorMessage = error.error?.message || error.message || 'Невідома помилка';
       this.alertService.error(
         'Помилка ініціалізації',
-        'Не вдалося ініціалізувати базу даних. Спробуйте ще раз.'
+        `Не вдалося ініціалізувати базу даних: ${errorMessage}`
       );
     } finally {
       this.loading = false;
