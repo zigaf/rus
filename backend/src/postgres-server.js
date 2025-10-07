@@ -69,68 +69,98 @@ async function testDatabaseConnection() {
 // Initialize database tables
 async function initializeTables(client) {
   try {
-    console.log('🔧 Initializing database tables...');
+    console.log('🔧 Checking database tables...');
+    
+    // Check if tables already exist
+    const tablesCheck = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('User', 'Article', 'GalleryImage', 'ContactMessage')
+    `);
+    
+    const existingTables = tablesCheck.rows.map(row => row.table_name);
+    console.log('📋 Existing tables:', existingTables);
+    
+    if (existingTables.length === 4) {
+      console.log('✅ All tables already exist, skipping initialization');
+      return;
+    }
+    
+    console.log('🔧 Creating missing tables...');
     
     // Create users table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "User" (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        role VARCHAR(50) DEFAULT 'ADMIN',
-        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (!existingTables.includes('User')) {
+      await client.query(`
+        CREATE TABLE "User" (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          role VARCHAR(50) DEFAULT 'ADMIN',
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ User table created');
+    }
     
     // Create articles table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "Article" (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(500) NOT NULL,
-        excerpt TEXT NOT NULL,
-        category VARCHAR(100) NOT NULL,
-        image VARCHAR(500),
-        content JSONB NOT NULL,
-        date VARCHAR(100) NOT NULL,
-        "readTime" VARCHAR(50) NOT NULL,
-        published BOOLEAN DEFAULT false,
-        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (!existingTables.includes('Article')) {
+      await client.query(`
+        CREATE TABLE "Article" (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(500) NOT NULL,
+          excerpt TEXT NOT NULL,
+          category VARCHAR(100) NOT NULL,
+          image VARCHAR(500),
+          content JSONB NOT NULL,
+          date VARCHAR(100) NOT NULL,
+          "readTime" VARCHAR(50) NOT NULL,
+          published BOOLEAN DEFAULT false,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ Article table created');
+    }
     
     // Create gallery images table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "GalleryImage" (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255),
-        description TEXT,
-        "imageUrl" VARCHAR(500) NOT NULL,
-        "imageType" VARCHAR(50) DEFAULT 'image',
-        "fileSize" INTEGER,
-        width INTEGER,
-        height INTEGER,
-        "order" INTEGER DEFAULT 0,
-        published BOOLEAN DEFAULT true,
-        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (!existingTables.includes('GalleryImage')) {
+      await client.query(`
+        CREATE TABLE "GalleryImage" (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255),
+          description TEXT,
+          "imageUrl" VARCHAR(500) NOT NULL,
+          "imageType" VARCHAR(50) DEFAULT 'image',
+          "fileSize" INTEGER,
+          width INTEGER,
+          height INTEGER,
+          "order" INTEGER DEFAULT 0,
+          published BOOLEAN DEFAULT true,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ GalleryImage table created');
+    }
     
     // Create contact messages table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "ContactMessage" (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        message TEXT NOT NULL,
-        read BOOLEAN DEFAULT false,
-        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (!existingTables.includes('ContactMessage')) {
+      await client.query(`
+        CREATE TABLE "ContactMessage" (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          phone VARCHAR(50),
+          message TEXT NOT NULL,
+          read BOOLEAN DEFAULT false,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ ContactMessage table created');
+    }
     
     // Create default admin user if not exists
     const existingAdmin = await client.query('SELECT id FROM "User" WHERE email = $1', ['admin@ruslana.com']);
@@ -147,9 +177,11 @@ async function initializeTables(client) {
         new Date()
       ]);
       console.log('✅ Default admin user created');
+    } else {
+      console.log('ℹ️ Admin user already exists');
     }
     
-    console.log('✅ Database tables initialized successfully');
+    console.log('✅ Database initialization completed');
   } catch (error) {
     console.error('⚠️ Could not initialize tables:', error.message);
   }
