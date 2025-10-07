@@ -214,9 +214,10 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    server: 'sqlite-backend',
+    server: 'sqlite-backend-v2',
     database: 'sqlite',
-    message: 'Backend is running successfully!'
+    message: 'SQLite backend is running successfully!',
+    version: '2.0.0'
   });
 });
 
