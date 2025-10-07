@@ -416,17 +416,26 @@ export class AdminComponent implements OnInit {
     this.uploadProgress = 0;
 
     try {
-      const response = await this.apiService.uploadFile(this.selectedFile).toPromise();
+      const formData = new FormData();
+      formData.append('file', this.selectedFile);
+
+      const response = await this.apiService.uploadFile(formData).toPromise();
       if (response?.success) {
-        this.newGalleryImage.imageUrl = response.file.fileUrl;
+        // Backend returns response.url, not response.file.fileUrl
+        this.newGalleryImage.imageUrl = response.url;
+        this.newArticle.image = response.url; // Also set for articles
         this.uploadError = '';
         this.selectedFile = null;
+        
+        this.alertService.success('Завантажено', 'Файл успішно завантажено!');
+        
         // Reset file input
         const fileInput = document.getElementById('fileInput') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
       }
     } catch (error: any) {
       this.uploadError = error.error?.error || 'Помилка завантаження файлу';
+      this.alertService.error('Помилка завантаження', this.uploadError);
     } finally {
       this.loading = false;
       this.uploadProgress = 0;
