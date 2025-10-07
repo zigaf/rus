@@ -229,10 +229,14 @@ export class AdminComponent implements OnInit {
   }
 
   addSection() {
-    if (this.newSection.heading && this.newSection.text) {
-      this.newArticle.content!.sections!.push({ ...this.newSection });
-      this.newSection = { heading: '', text: '' };
+    // Add an empty section that can be filled in directly
+    if (!this.newArticle.content) {
+      this.newArticle.content = { intro: '', sections: [] };
     }
+    if (!this.newArticle.content.sections) {
+      this.newArticle.content.sections = [];
+    }
+    this.newArticle.content.sections.push({ heading: '', text: '' });
   }
 
   removeSection(index: number) {
