@@ -1,0 +1,104 @@
+<!-- Alert Container -->
+<div class="fixed top-4 right-4 z-50 space-y-3 max-w-md">
+  <!-- Individual Alerts -->
+  <div *ngFor="let alert of alerts" 
+       [class]="getAlertClasses(alert.type)"
+       class="transform transition-all duration-300 ease-in-out animate-slide-in-right shadow-lg rounded-lg p-4 border-l-4">
+    
+    <!-- Alert Header -->
+    <div class="flex items-start">
+      <!-- Icon -->
+      <div class="flex-shrink-0 mr-3">
+        <svg *ngIf="alert.type === 'success'" class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <svg *ngIf="alert.type === 'error'" class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <svg *ngIf="alert.type === 'warning'" class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <svg *ngIf="alert.type === 'info'" class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-semibold text-gray-900 mb-1">{{ alert.title }}</h4>
+        <p class="text-sm text-gray-700">{{ alert.message }}</p>
+        
+        <!-- Actions -->
+        <div *ngIf="alert.actions && alert.actions.length > 0" class="mt-3 flex space-x-2">
+          <button *ngFor="let action of alert.actions"
+                  [class]="getActionClasses(action.style)"
+                  (click)="action.action()"
+                  class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
+            {{ action.text }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Close Button -->
+      <button *ngIf="alert.showCloseButton"
+              (click)="closeAlert(alert.id)"
+              class="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<div *ngIf="confirmDialog" 
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+     (click)="closeConfirmDialog()">
+  
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 animate-scale-in"
+       (click)="$event.stopPropagation()">
+    
+    <!-- Dialog Header -->
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center">
+        <!-- Icon -->
+        <div class="flex-shrink-0 mr-4">
+          <div [class]="getConfirmIconClasses(confirmDialog.type)"
+               class="w-12 h-12 rounded-full flex items-center justify-center">
+            <svg *ngIf="confirmDialog.type === 'warning'" class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <svg *ngIf="confirmDialog.type === 'danger'" class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <svg *ngIf="confirmDialog.type === 'info'" class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-lg font-semibold text-gray-900">{{ confirmDialog.title }}</h3>
+      </div>
+    </div>
+
+    <!-- Dialog Body -->
+    <div class="p-6">
+      <p class="text-gray-700 leading-relaxed">{{ confirmDialog.message }}</p>
+    </div>
+
+    <!-- Dialog Footer -->
+    <div class="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
+      <button (click)="executeCancel()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        {{ confirmDialog.cancelText }}
+      </button>
+      <button (click)="executeConfirm()"
+              [class]="getConfirmButtonClasses(confirmDialog.type)"
+              class="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors">
+        {{ confirmDialog.confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

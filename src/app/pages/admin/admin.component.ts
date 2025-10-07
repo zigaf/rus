@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, Article, GalleryImage, UploadResponse } from '../../services/api.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-admin',
@@ -56,7 +57,8 @@ export class AdminComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
@@ -93,8 +95,17 @@ export class AdminComponent implements OnInit {
       this.isAuthenticated = true;
       this.activeTab = 'articles';
       await this.loadUserData();
+      
+      this.alertService.success(
+        'Успішний вхід',
+        'Ви успішно увійшли в адмін-панель'
+      );
     } catch (error: any) {
       this.loginError = error.error?.error || 'Помилка входу';
+      this.alertService.error(
+        'Помилка входу',
+        this.loginError
+      );
     } finally {
       this.loading = false;
     }
@@ -120,7 +131,10 @@ export class AdminComponent implements OnInit {
 
   async saveArticle() {
     if (!this.newArticle.title || !this.newArticle.excerpt || !this.newArticle.category) {
-      alert('Заповніть обов\'язкові поля');
+      this.alertService.warning(
+        'Незаповнені поля',
+        'Будь ласка, заповніть всі обов\'язкові поля'
+      );
       return;
     }
 
@@ -128,14 +142,25 @@ export class AdminComponent implements OnInit {
     try {
       if (this.editingArticle) {
         await this.apiService.updateArticle(this.editingArticle.id, this.newArticle).toPromise();
+        this.alertService.success(
+          'Статтю оновлено',
+          'Статтю успішно оновлено'
+        );
       } else {
         await this.apiService.createArticle(this.newArticle).toPromise();
+        this.alertService.success(
+          'Статтю створено',
+          'Нову статтю успішно створено'
+        );
       }
       await this.loadArticles();
       this.resetArticleForm();
     } catch (error) {
       console.error('Error saving article:', error);
-      alert('Помилка збереження статті');
+      this.alertService.error(
+        'Помилка збереження',
+        'Не вдалося зберегти статтю. Спробуйте ще раз.'
+      );
     } finally {
       this.loading = false;
     }
@@ -148,15 +173,33 @@ export class AdminComponent implements OnInit {
   }
 
   deleteArticle(id: number) {
-    if (confirm('Ви впевнені, що хочете видалити цю статтю?')) {
-      this.apiService.deleteArticle(id).subscribe({
-        next: () => this.loadArticles(),
-        error: (error) => {
-          console.error('Error deleting article:', error);
-          alert('Помилка видалення статті');
-        }
-      });
-    }
+    this.alertService.confirm(
+      'Видалити статтю',
+      'Ви впевнені, що хочете видалити цю статтю? Цю дію неможливо скасувати.',
+      () => {
+        this.apiService.deleteArticle(id).subscribe({
+          next: () => {
+            this.loadArticles();
+            this.alertService.success(
+              'Статтю видалено',
+              'Статтю успішно видалено'
+            );
+          },
+          error: (error) => {
+            console.error('Error deleting article:', error);
+            this.alertService.error(
+              'Помилка видалення',
+              'Не вдалося видалити статтю. Спробуйте ще раз.'
+            );
+          }
+        });
+      },
+      {
+        confirmText: 'Видалити',
+        cancelText: 'Скасувати',
+        type: 'danger'
+      }
+    );
   }
 
   resetArticleForm() {
@@ -196,7 +239,10 @@ export class AdminComponent implements OnInit {
 
   async saveGalleryImage() {
     if (!this.newGalleryImage.imageUrl) {
-      alert('Додайте зображення');
+      this.alertService.warning(
+        'Відсутнє зображення',
+        'Будь ласка, додайте URL зображення або завантажте файл'
+      );
       return;
     }
 
@@ -204,14 +250,25 @@ export class AdminComponent implements OnInit {
     try {
       if (this.editingGalleryImage) {
         await this.apiService.updateGalleryImage(this.editingGalleryImage.id, this.newGalleryImage).toPromise();
+        this.alertService.success(
+          'Зображення оновлено',
+          'Зображення галереї успішно оновлено'
+        );
       } else {
         await this.apiService.createGalleryImage(this.newGalleryImage).toPromise();
+        this.alertService.success(
+          'Зображення додано',
+          'Нове зображення успішно додано до галереї'
+        );
       }
       await this.loadGalleryImages();
       this.resetGalleryForm();
     } catch (error) {
       console.error('Error saving gallery image:', error);
-      alert('Помилка збереження зображення');
+      this.alertService.error(
+        'Помилка збереження',
+        'Не вдалося зберегти зображення. Спробуйте ще раз.'
+      );
     } finally {
       this.loading = false;
     }
@@ -223,15 +280,33 @@ export class AdminComponent implements OnInit {
   }
 
   deleteGalleryImage(id: number) {
-    if (confirm('Ви впевнені, що хочете видалити це зображення?')) {
-      this.apiService.deleteGalleryImage(id).subscribe({
-        next: () => this.loadGalleryImages(),
-        error: (error) => {
-          console.error('Error deleting gallery image:', error);
-          alert('Помилка видалення зображення');
-        }
-      });
-    }
+    this.alertService.confirm(
+      'Видалити зображення',
+      'Ви впевнені, що хочете видалити це зображення з галереї? Цю дію неможливо скасувати.',
+      () => {
+        this.apiService.deleteGalleryImage(id).subscribe({
+          next: () => {
+            this.loadGalleryImages();
+            this.alertService.success(
+              'Зображення видалено',
+              'Зображення успішно видалено з галереї'
+            );
+          },
+          error: (error) => {
+            console.error('Error deleting gallery image:', error);
+            this.alertService.error(
+              'Помилка видалення',
+              'Не вдалося видалити зображення. Спробуйте ще раз.'
+            );
+          }
+        });
+      },
+      {
+        confirmText: 'Видалити',
+        cancelText: 'Скасувати',
+        type: 'danger'
+      }
+    );
   }
 
   resetGalleryForm() {
