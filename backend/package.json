@@ -4,7 +4,7 @@
   "description": "Backend for Ruslana Moskalenko medical website",
   "main": "dist/server.js",
   "scripts": {
-    "build": "echo 'No build needed for postgres server'",
+    "build": "echo 'No build needed for SQLite server'",
     "start": "node src/sqlite-server.js",
     "dev": "node src/sqlite-server.js",
     "migrate": "npx prisma migrate dev",
