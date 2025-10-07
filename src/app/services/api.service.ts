@@ -60,16 +60,12 @@ export interface LoginResponse {
 
 export interface UploadResponse {
   success: boolean;
-  file: {
-    originalName: string;
-    fileName: string;
-    fileUrl: string;
-    filePath: string;
-    mimetype: string;
-    size: number;
-    width?: number;
-    height?: number;
-  };
+  url: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  mimetype: string;
+  message?: string;
 }
 
 @Injectable({
