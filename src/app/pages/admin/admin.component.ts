@@ -420,10 +420,7 @@ export class AdminComponent implements OnInit {
     this.uploadProgress = 0;
 
     try {
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-
-      const response = await this.apiService.uploadFile(formData).toPromise();
+      const response = await this.apiService.uploadFile(this.selectedFile).toPromise();
       if (response?.success) {
         // Backend returns response.url, not response.file.fileUrl
         this.newGalleryImage.imageUrl = response.url;
