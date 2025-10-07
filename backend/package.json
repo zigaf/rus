@@ -11,6 +11,7 @@
     "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "studio": "npx prisma studio",
+    "init-db": "node scripts/init-db.js",
     "postinstall": "echo 'PostgreSQL server ready'"
   },
   "dependencies": {
