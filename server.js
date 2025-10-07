@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist/rus')));
+app.use(express.static(path.join(__dirname, 'dist/ruslana-doctor-site')));
 
 // API routes
 app.get('/api/health', (req, res) => {
@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 
 // Serve Angular app for all routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/rus/index.html'));
+  res.sendFile(path.join(__dirname, 'dist/ruslana-doctor-site/index.html'));
 });
 
 // Error handling
