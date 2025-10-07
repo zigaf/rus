@@ -12,22 +12,34 @@ import { ApiService, Article, GalleryImage } from '../../services/api.service';
 })
 export class HomeComponent implements OnInit {
   articles: Article[] = [];
-  galleryImages: any[] = [];
+  galleryImages: GalleryImage[] = [];
 
-  constructor(private dataService: DataService) {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     this.loadData();
   }
 
-  loadData() {
-    this.articles = this.dataService.getArticles();
-    this.galleryImages = this.dataService.getGallery();
-    
-    // Fallback articles if none exist
-    if (this.articles.length === 0) {
-      this.articles = this.getDefaultArticles();
+  async loadData() {
+    try {
+      // Load articles from API
+      this.articles = await this.apiService.getArticles().toPromise() || [];
+      
+      // Load gallery images from API
+      this.galleryImages = await this.apiService.getGalleryImages().toPromise() || [];
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Fallback to default data if API is not available
+      this.loadDefaultData();
     }
+  }
+
+  loadDefaultData() {
+    // Fallback articles
+    this.articles = this.getDefaultArticles();
+    
+    // Fallback gallery images
+    this.galleryImages = this.getDefaultGalleryImages();
   }
 
   private getDefaultArticles(): Article[] {
@@ -40,6 +52,9 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&h=600&fit=crop',
       date: '15 березня 2025',
       readTime: '7 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Рак легень залишається одним з найпоширеніших онкологічних захворювань.', sections: [{ heading: 'Симптоми', text: 'Кашель, задишка, біль у грудях.' }] }
     },
     {
@@ -50,6 +65,9 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&h=600&fit=crop',
       date: '10 березня 2025',
       readTime: '8 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Сучасні методи лікування.', sections: [{ heading: 'Хірургія', text: 'Операційне видалення.' }] }
     },
     {
@@ -60,6 +78,9 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&h=600&fit=crop',
       date: '5 березня 2025',
       readTime: '6 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Профілактика раку легень.', sections: [{ heading: 'Куріння', text: 'Головний фактор ризику.' }] }
     },
     {
@@ -70,6 +91,9 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
       date: '1 березня 2025',
       readTime: '9 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Хірургічне лікування.', sections: [{ heading: 'Операція', text: 'Підготовка та реабілітація.' }] }
     },
     {
@@ -80,6 +104,9 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
       date: '25 лютого 2025',
       readTime: '7 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Імунотерапія - революційний метод.', sections: [{ heading: 'Ефективність', text: 'Нові можливості лікування.' }] }
     },
     {
@@ -90,9 +117,50 @@ export class HomeComponent implements OnInit {
       image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&h=600&fit=crop',
       date: '20 лютого 2025',
       readTime: '6 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: { intro: 'Відновлення після лікування.', sections: [{ heading: 'Реабілітація', text: 'Повернення до життя.' }] }
     }
   ];
+  }
+
+  private getDefaultGalleryImages(): GalleryImage[] {
+    return [
+      {
+        id: 1,
+        title: 'Медичне обладнання',
+        description: 'Сучасне обладнання для діагностики та лікування',
+        imageUrl: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
+        imageType: 'image',
+        order: 1,
+        published: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        title: 'Хірургічний кабінет',
+        description: 'Сучасний хірургічний кабінет',
+        imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
+        imageType: 'image',
+        order: 2,
+        published: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 3,
+        title: 'Лабораторія',
+        description: 'Сучасна лабораторія для аналізів',
+        imageUrl: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&h=600&fit=crop',
+        imageType: 'image',
+        order: 3,
+        published: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
   }
 }
 

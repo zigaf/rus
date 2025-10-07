@@ -210,9 +210,17 @@
         <div *ngFor="let image of galleryImages; let i = index" 
              [class]="i === 4 ? 'aspect-square rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-scale-in col-span-2' : 'aspect-square rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-scale-in'"
              [style.animation-delay]="i * 0.1 + 's'">
-          <img [src]="image.image" 
-               [alt]="image.alt" 
-               class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+          <img 
+            *ngIf="image.imageType === 'image'"
+            [src]="image.imageUrl" 
+            [alt]="image.title || 'Gallery image'" 
+            class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+          <video 
+            *ngIf="image.imageType === 'video'"
+            [src]="image.imageUrl"
+            class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+            muted>
+          </video>
         </div>
       </ng-container>
       
