@@ -44,15 +44,28 @@ https://rus-production.up.railway.app/
 });
 
 bot1.on('text', async (ctx) => {
-  const query = ctx.message.text.toLowerCase();
-  
-  if (query.includes('запитати лікаря') || query.includes('лікар') || query.includes('питання')) {
-    // Send question to doctor channel via bot2
-    await sendQuestionToDoctor(ctx.from, ctx.message.text);
-    await ctx.reply('✅ *Ваше питання відправлено лікарю!*\n\n⏰ Ви отримаєте відповідь протягом 24-48 годин.');
-  } else {
-    // Search articles (simplified for now)
-    await ctx.reply('🔍 *Шукаю інформацію...*\n\n📝 За вашим запитом знайдено кілька статей. Перегляньте їх на сайті: https://rus-production.up.railway.app/\n\n❓ *Не знайшли потрібну інформацію?* Напишіть "запитати лікаря"');
+  try {
+    const query = ctx.message.text.toLowerCase();
+    
+    if (query.includes('запитати лікаря') || query.includes('лікар') || query.includes('питання')) {
+      // Send question to doctor channel via bot2
+      const success = await sendQuestionToDoctor(ctx.from, ctx.message.text);
+      if (success) {
+        await ctx.reply('✅ *Ваше питання відправлено лікарю!*\n\n⏰ Ви отримаєте відповідь протягом 24-48 годин.');
+      } else {
+        await ctx.reply('❌ *Помилка відправки питання.*\n\n🔄 Спробуйте пізніше або зверніться безпосередньо до лікаря.\n\n📞 *Контакти:* https://rus-production.up.railway.app/');
+      }
+    } else {
+      // Search articles (simplified for now)
+      await ctx.reply('🔍 *Шукаю інформацію...*\n\n📝 За вашим запитом знайдено кілька статей. Перегляньте їх на сайті: https://rus-production.up.railway.app/\n\n❓ *Не знайшли потрібну інформацію?* Напишіть "запитати лікаря"');
+    }
+  } catch (error) {
+    console.error('Error in bot1 text handler:', error);
+    try {
+      await ctx.reply('❌ *Виникла помилка.*\n\n🔄 Спробуйте пізніше або зверніться на сайт: https://rus-production.up.railway.app/');
+    } catch (replyError) {
+      console.error('Error sending error message:', replyError);
+    }
   }
 });
 
@@ -95,15 +108,39 @@ ${question}
 💬 *Для відповіді:* Відповідь на це повідомлення
     `;
 
-    // Send to doctor channel
-    await bot2.telegram.sendMessage(doctorChannelId, message, {
-      parse_mode: 'Markdown'
-    });
-
-    console.log(`Question ${questionId} sent to doctor channel`);
-    return true;
+    // Send to doctor channel with retry logic
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        await bot2.telegram.sendMessage(doctorChannelId, message, {
+          parse_mode: 'Markdown'
+        });
+        console.log(`✅ Question ${questionId} sent to doctor channel`);
+        return true;
+      } catch (sendError) {
+        retries--;
+        console.error(`❌ Failed to send question (${3 - retries}/3):`, sendError.message);
+        
+        if (retries === 0) {
+          throw sendError;
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
   } catch (error) {
-    console.error('Error sending question to doctor:', error);
+    console.error('❌ Error sending question to doctor:', error.message);
+    
+    // Log specific error types
+    if (error.message.includes('chat not found')) {
+      console.error('🚨 Bot is not added to the doctor channel!');
+    } else if (error.message.includes('Forbidden')) {
+      console.error('🚨 Bot does not have permission to send messages to channel!');
+    } else if (error.message.includes('Bad Request')) {
+      console.error('🚨 Invalid message format or channel ID!');
+    }
+    
     return false;
   }
 }
@@ -124,9 +161,41 @@ function formatUserInfo(user) {
   return info;
 }
 
-// Launch bots
-bot1.launch();
-bot2.launch();
+// Error handling for bots
+bot1.catch((err, ctx) => {
+  console.error('❌ Bot1 error:', err);
+  try {
+    ctx.reply('❌ Виникла помилка. Спробуйте пізніше.');
+  } catch (replyError) {
+    console.error('Error sending error message:', replyError);
+  }
+});
+
+bot2.catch((err, ctx) => {
+  console.error('❌ Bot2 error:', err);
+  try {
+    if (ctx && ctx.reply) {
+      ctx.reply('❌ Виникла помилка. Спробуйте пізніше.');
+    }
+  } catch (replyError) {
+    console.error('Error sending error message:', replyError);
+  }
+});
+
+// Launch bots with error handling
+try {
+  bot1.launch();
+  console.log('✅ Bot 1 launched successfully');
+} catch (error) {
+  console.error('❌ Failed to launch Bot 1:', error);
+}
+
+try {
+  bot2.launch();
+  console.log('✅ Bot 2 launched successfully');
+} catch (error) {
+  console.error('❌ Failed to launch Bot 2:', error);
+}
 
 console.log('🚀 Telegram bots started successfully!');
 console.log(`📱 Bot 1 (Article Search): @moskalenko_helper_bot`);
@@ -136,14 +205,33 @@ console.log(`📺 Doctor Channel: ${doctorChannelId}`);
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n🛑 Shutting down bots...');
-  bot1.stop();
-  bot2.stop();
+  try {
+    bot1.stop();
+    bot2.stop();
+  } catch (error) {
+    console.error('Error stopping bots:', error);
+  }
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   console.log('\n🛑 Shutting down bots...');
-  bot1.stop();
-  bot2.stop();
+  try {
+    bot1.stop();
+    bot2.stop();
+  } catch (error) {
+    console.error('Error stopping bots:', error);
+  }
   process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  // Don't exit, let Railway handle restart
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit, let Railway handle restart
 });

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { ApiService, Article, GalleryImage } from '../../services/api.service';
 
 @Component({
@@ -20,18 +22,39 @@ export class HomeComponent implements OnInit {
     this.loadData();
   }
 
-  async loadData() {
-    try {
-      // Load articles from API
-      this.articles = await this.apiService.getArticles().toPromise() || [];
-      
-      // Load gallery images from API
-      this.galleryImages = await this.apiService.getGalleryImages().toPromise() || [];
-    } catch (error) {
-      console.error('Error loading data:', error);
-      // Fallback to default data if API is not available
-      this.loadDefaultData();
-    }
+  loadData() {
+    console.log('Loading data...');
+    
+    // First load default data to show something immediately
+    this.loadDefaultData();
+    console.log('Default data loaded:', { articles: this.articles.length, gallery: this.galleryImages.length });
+    
+    // Then try to load from API
+    this.apiService.getArticles().pipe(
+      catchError((error) => {
+        console.error('Error loading articles:', error);
+        return of([]);
+      })
+    ).subscribe(articles => {
+      console.log('API articles received:', articles);
+      if (articles && articles.length > 0) {
+        this.articles = articles;
+        console.log('Articles updated from API:', this.articles.length);
+      }
+    });
+
+    this.apiService.getGalleryImages().pipe(
+      catchError((error) => {
+        console.error('Error loading gallery:', error);
+        return of([]);
+      })
+    ).subscribe(galleryImages => {
+      console.log('API gallery received:', galleryImages);
+      if (galleryImages && galleryImages.length > 0) {
+        this.galleryImages = galleryImages;
+        console.log('Gallery updated from API:', this.galleryImages.length);
+      }
+    });
   }
 
   loadDefaultData() {
