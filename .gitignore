@@ -81,3 +81,7 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Backend is a separate repository
+backend/
+telegram-bots/
