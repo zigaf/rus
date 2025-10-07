@@ -321,6 +321,29 @@ export class AdminComponent implements OnInit {
     this.editingGalleryImage = null;
   }
 
+  async initializeDatabase() {
+    this.loading = true;
+    try {
+      await this.apiService.initializeDatabase().toPromise();
+      this.alertService.success(
+        'База даних ініціалізована',
+        'Таблиці успішно створені в базі даних'
+      );
+      
+      // Reload data after initialization
+      await this.loadArticles();
+      await this.loadGalleryImages();
+    } catch (error) {
+      console.error('Error initializing database:', error);
+      this.alertService.error(
+        'Помилка ініціалізації',
+        'Не вдалося ініціалізувати базу даних. Спробуйте ще раз.'
+      );
+    } finally {
+      this.loading = false;
+    }
+  }
+
   // File upload methods
   onFileSelected(event: any) {
     const file = event.target.files[0];

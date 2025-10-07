@@ -247,4 +247,9 @@ export class ApiService {
   getContactStats(): Observable<{ total: number; unread: number; today: number; read: number }> {
     return this.http.get<{ total: number; unread: number; today: number; read: number }>(`${this.API_URL}/contact/stats/overview`, { headers: this.getHeaders() });
   }
+
+  // Database
+  initializeDatabase(): Observable<any> {
+    return this.http.post(`${this.API_URL}/init-db`, {});
+  }
 }
