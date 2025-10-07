@@ -293,6 +293,48 @@ app.get('/api/db-status', async (req, res) => {
   }
 });
 
+// Test endpoint to create a simple article
+app.post('/api/test-article', async (req, res) => {
+  let client;
+  try {
+    client = await pool.connect();
+    
+    // Try to create a test article
+    const result = await client.query(`
+      INSERT INTO "Article" (title, excerpt, category, image, content, published, "createdAt", "updatedAt") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+    `, [
+      'Тестова стаття',
+      'Це тестова стаття для перевірки роботи бази даних',
+      'Тест',
+      'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
+      JSON.stringify({ intro: 'Тестова стаття', sections: [{ heading: 'Тест', text: 'Тестовий контент' }] }),
+      true,
+      new Date(),
+      new Date()
+    ]);
+    
+    console.log('✅ Test article created:', result.rows[0].id);
+    res.json({
+      success: true,
+      message: 'Test article created successfully',
+      article: result.rows[0]
+    });
+  } catch (error) {
+    console.error('❌ Test article creation failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test article creation failed',
+      error: error.message,
+      details: error.toString()
+    });
+  } finally {
+    if (client) {
+      client.release();
+    }
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 

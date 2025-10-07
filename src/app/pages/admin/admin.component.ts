@@ -365,6 +365,38 @@ export class AdminComponent implements OnInit {
     }
   }
 
+  async createTestArticle() {
+    this.loading = true;
+    try {
+      const response = await this.apiService.createTestArticle().toPromise();
+      
+      if (response.success) {
+        this.alertService.success(
+          'Тестова стаття створена',
+          'Тестова стаття успішно створена в базі даних'
+        );
+        
+        // Reload data after test
+        await this.checkDatabaseStatus();
+        await this.loadArticles();
+      } else {
+        this.alertService.error(
+          'Помилка створення тестової статті',
+          response.message || 'Не вдалося створити тестову статтю'
+        );
+      }
+    } catch (error: any) {
+      console.error('Error creating test article:', error);
+      const errorMessage = error.error?.message || error.message || 'Невідома помилка';
+      this.alertService.error(
+        'Помилка створення тестової статті',
+        `Не вдалося створити тестову статтю: ${errorMessage}`
+      );
+    } finally {
+      this.loading = false;
+    }
+  }
+
   // File upload methods
   onFileSelected(event: any) {
     const file = event.target.files[0];

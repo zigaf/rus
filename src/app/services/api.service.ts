@@ -256,4 +256,8 @@ export class ApiService {
   getDatabaseStatus(): Observable<any> {
     return this.http.get(`${this.API_URL}/db-status`);
   }
+
+  createTestArticle(): Observable<any> {
+    return this.http.post(`${this.API_URL}/test-article`, {});
+  }
 }
