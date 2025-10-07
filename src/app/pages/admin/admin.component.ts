@@ -433,9 +433,11 @@ export class AdminComponent implements OnInit {
         
         this.alertService.success('Завантажено', 'Файл успішно завантажено!');
         
-        // Reset file input
+        // Reset both file inputs
         const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+        const articleFileInput = document.getElementById('articleFileInput') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+        if (articleFileInput) articleFileInput.value = '';
       }
     } catch (error: any) {
       this.uploadError = error.error?.error || 'Помилка завантаження файлу';
