@@ -58,6 +58,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 1,
         title: 'Рак легень: ранні ознаки та діагностика',
+        slug: 'rak-legeniv-ranni-oznaky-ta-diagnostyka',
         excerpt: 'Рак легень - одне з найпоширеніших онкологічних захворювань. Дізнайтеся про перші симптоми та сучасні методи діагностики.',
         category: 'Діагностика',
         image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&h=600&fit=crop',
@@ -71,6 +72,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 2,
         title: 'Сучасні методи лікування раку легень',
+        slug: 'suchasni-metody-likuvannia-raku-leheniv',
         excerpt: 'Від хірургічного втручання до таргетної терапії - огляд найефективніших методів лікування онкології легень.',
         category: 'Лікування',
         image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&h=600&fit=crop',
@@ -84,6 +86,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 3,
         title: 'Профілактика раку легень',
+        slug: 'profilaktyka-raku-leheniv',
         excerpt: 'Важливість відмови від куріння, регулярних обстежень та здорового способу життя для профілактики раку легень.',
         category: 'Профілактика',
         image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&h=600&fit=crop',
@@ -97,6 +100,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 4,
         title: 'Хірургічне лікування: що потрібно знати',
+        slug: 'khirurhichne-likuvannia-shcho-potribno-znaty',
         excerpt: 'Підготовка до операції, види хірургічних втручань та реабілітація після видалення пухлини легень.',
         category: 'Хірургія',
         image: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&h=600&fit=crop',
@@ -110,6 +114,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 5,
         title: 'Імунотерапія в лікуванні раку легень',
+        slug: 'imunoterapiia-v-likuvanni-raku-leheniv',
         excerpt: 'Сучасні досягнення імунотерапії відкривають нові можливості в боротьбі з раком легень.',
         category: 'Інновації',
         image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
@@ -123,6 +128,7 @@ export class ArticlesComponent implements OnInit {
       {
         id: 6,
         title: 'Життя після лікування раку',
+        slug: 'zhyttia-pislia-likuvannia-raku',
         excerpt: 'Психологічна підтримка, фізична реабілітація та повернення до повноцінного життя після лікування.',
         category: 'Реабілітація',
         image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&h=600&fit=crop',

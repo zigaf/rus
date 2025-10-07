@@ -57,11 +57,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 1,
       title: 'Рак легень: ранні ознаки та діагностика',
+      slug: 'rak-legeniv-ranni-oznaky-ta-diagnostyka',
       excerpt: 'Рак легень - одне з найпоширеніших онкологічних захворювань. Дізнайтеся про перші симптоми та сучасні методи діагностики.',
       category: 'Діагностика',
       image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1200&h=800&fit=crop',
       date: '15 березня 2025',
       readTime: '7 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Рак легень залишається одним з найпоширеніших онкологічних захворювань у світі. Рання діагностика значно підвищує шанси на успішне лікування.',
         sections: [
@@ -87,11 +91,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 2,
       title: 'Сучасні методи лікування раку легень',
+      slug: 'suchasni-metody-likuvannia-raku-leheniv',
       excerpt: 'Від хірургічного втручання до таргетної терапії - огляд найефективніших методів лікування онкології легень.',
       category: 'Лікування',
       image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&h=800&fit=crop',
       date: '10 березня 2025',
       readTime: '8 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Лікування раку легень вимагає індивідуального підходу та комбінації різних методів терапії залежно від стадії та типу пухлини.',
         sections: [
@@ -117,11 +125,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 3,
       title: 'Профілактика раку легень',
+      slug: 'profilaktyka-raku-leheniv',
       excerpt: 'Важливість відмови від куріння, регулярних обстежень та здорового способу життя для профілактики раку легень.',
       category: 'Профілактика',
       image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=1200&h=800&fit=crop',
       date: '5 березня 2025',
       readTime: '6 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Профілактика раку легень - це комплекс заходів, спрямованих на зниження ризику розвитку захворювання та його раннє виявлення.',
         sections: [
@@ -147,11 +159,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 4,
       title: 'Хірургічне лікування: що потрібно знати',
+      slug: 'khirurhichne-likuvannia-shcho-potribno-znaty',
       excerpt: 'Підготовка до операції, види хірургічних втручань та реабілітація після видалення пухлини легень.',
       category: 'Хірургія',
       image: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=1200&h=800&fit=crop',
       date: '1 березня 2025',
       readTime: '9 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Хірургічне видалення пухлини - основний метод лікування раку легень на ранніх стадіях. Сучасні технології роблять операції більш безпечними та ефективними.',
         sections: [
@@ -177,11 +193,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 5,
       title: 'Імунотерапія в лікуванні раку легень',
+      slug: 'imunoterapiia-v-likuvanni-raku-leheniv',
       excerpt: 'Сучасні досягнення імунотерапії відкривають нові можливості в боротьбі з раком легень.',
       category: 'Інновації',
       image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=800&fit=crop',
       date: '25 лютого 2025',
       readTime: '7 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Імунотерапія - революційний метод лікування раку, який активує власний імунітет організму для боротьби з пухлиною.',
         sections: [
@@ -207,11 +227,15 @@ export class ArticleComponent implements OnInit {
     {
       id: 6,
       title: 'Життя після лікування раку',
+      slug: 'zhyttia-pislia-likuvannia-raku',
       excerpt: 'Психологічна підтримка, фізична реабілітація та повернення до повноцінного життя після лікування.',
       category: 'Реабілітація',
       image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=1200&h=800&fit=crop',
       date: '20 лютого 2025',
       readTime: '6 хв',
+      published: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       content: {
         intro: 'Завершення лікування - не кінець шляху, а початок нового етапу життя. Реабілітація та психологічна підтримка важливі для повернення до повноцінного життя.',
         sections: [
