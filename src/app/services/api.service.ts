@@ -75,7 +75,7 @@ export interface UploadResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly API_URL = 'http://localhost:3001/api'; // Змініть на ваш Railway URL
+  private readonly API_URL = 'https://rus-production.up.railway.app/api';
   private tokenSubject = new BehaviorSubject<string | null>(this.getToken());
   public token$ = this.tokenSubject.asObservable();
 
