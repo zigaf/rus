@@ -1,0 +1,34 @@
+header {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+}
+
+// Active link styles
+a.active {
+  border-bottom-color: currentColor;
+}
+
+// Mobile adjustments
+@media (max-width: 768px) {
+  header nav a {
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .flex-col {
+      > div:first-child {
+        font-size: 1.25rem;
+      }
+      
+      > div:last-child {
+        font-size: 0.65rem;
+      }
+    }
+  }
+}
+

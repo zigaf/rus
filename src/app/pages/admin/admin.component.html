@@ -1,0 +1,441 @@
+<div class="min-h-screen bg-warm-gray-50 p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Login Form -->
+    <div *ngIf="!isAuthenticated" class="max-w-md mx-auto mt-20">
+      <div class="bg-white rounded-lg shadow-sm p-8">
+        <h1 class="text-3xl font-bold text-warm-gray-900 text-center mb-6">Вхід в адмін-панель</h1>
+        
+        <form (ngSubmit)="login()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-warm-gray-700 mb-2">Email</label>
+            <input 
+              type="email" 
+              [(ngModel)]="loginForm.email" 
+              name="email"
+              class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+              required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-warm-gray-700 mb-2">Пароль</label>
+            <input 
+              type="password" 
+              [(ngModel)]="loginForm.password" 
+              name="password"
+              class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+              required>
+          </div>
+          
+          <div *ngIf="loginError" class="text-red-600 text-sm">
+            {{ loginError }}
+          </div>
+          
+          <button 
+            type="submit" 
+            [disabled]="loading"
+            class="w-full bg-bronze-500 hover:bg-bronze-600 disabled:bg-warm-gray-400 text-white py-2 px-4 rounded-lg transition-colors">
+            {{ loading ? 'Вхід...' : 'Увійти' }}
+          </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <button 
+            (click)="goToHome()"
+            class="text-bronze-600 hover:text-bronze-700 text-sm">
+            Повернутися на головну
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div *ngIf="isAuthenticated">
+      <!-- Header -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-warm-gray-900">Адмін-панель</h1>
+            <p class="text-warm-gray-600 mt-2">Вітаємо, {{ currentUser?.name }}!</p>
+          </div>
+          <div class="flex gap-3">
+            <button 
+              (click)="logout()"
+              class="bg-warm-gray-500 hover:bg-warm-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+              Вийти
+            </button>
+            <button 
+              (click)="goToHome()"
+              class="bg-bronze-500 hover:bg-bronze-600 text-white px-4 py-2 rounded-lg transition-colors">
+              На головну
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="bg-white rounded-lg shadow-sm mb-6">
+        <div class="flex border-b border-warm-gray-200">
+          <button 
+            (click)="setActiveTab('articles')"
+            [class]="'px-6 py-4 font-medium transition-colors ' + (activeTab === 'articles' ? 'text-bronze-600 border-b-2 border-bronze-600' : 'text-warm-gray-600 hover:text-warm-gray-900')">
+            Статті ({{ articles.length }})
+          </button>
+          <button 
+            (click)="setActiveTab('gallery')"
+            [class]="'px-6 py-4 font-medium transition-colors ' + (activeTab === 'gallery' ? 'text-bronze-600 border-b-2 border-bronze-600' : 'text-warm-gray-600 hover:text-warm-gray-900')">
+            Галерея ({{ galleryImages.length }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Articles Tab -->
+      <div *ngIf="activeTab === 'articles'" class="space-y-6">
+        <!-- Add/Edit Article Form -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-bold text-warm-gray-900 mb-4">
+            {{ editingArticle ? 'Редагувати статтю' : 'Нова стаття' }}
+          </h2>
+          
+          <form (ngSubmit)="saveArticle()" class="space-y-4">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Заголовок *</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newArticle.title" 
+                  name="title"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+                  required>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Категорія *</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newArticle.category" 
+                  name="category"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+                  required>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">Короткий опис *</label>
+              <textarea 
+                [(ngModel)]="newArticle.excerpt" 
+                name="excerpt"
+                rows="3"
+                class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+                required></textarea>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Дата</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newArticle.date" 
+                  name="date"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Час читання</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newArticle.readTime" 
+                  name="readTime"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+              </div>
+              
+              <div class="flex items-center">
+                <label class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="newArticle.published" 
+                    name="published"
+                    class="mr-2">
+                  <span class="text-sm font-medium text-warm-gray-700">Опубліковано</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">URL зображення</label>
+              <input 
+                type="url" 
+                [(ngModel)]="newArticle.image" 
+                name="image"
+                class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">Вступ</label>
+              <textarea 
+                [(ngModel)]="newArticle.content!.intro" 
+                name="intro"
+                rows="3"
+                class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"></textarea>
+            </div>
+            
+            <!-- Sections -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="block text-sm font-medium text-warm-gray-700">Розділи</label>
+                <button 
+                  type="button"
+                  (click)="addSection()"
+                  class="text-bronze-600 hover:text-bronze-700 text-sm font-medium">
+                  + Додати розділ
+                </button>
+              </div>
+              
+              <div *ngFor="let section of newArticle.content!.sections; let i = index" class="mb-4 p-4 bg-warm-gray-50 rounded-lg">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-warm-gray-600">Розділ {{ i + 1 }}</span>
+                  <button 
+                    type="button"
+                    *ngIf="newArticle.content!.sections!.length > 1"
+                    (click)="removeSection(i)"
+                    class="text-red-500 hover:text-red-600">
+                    Видалити
+                  </button>
+                </div>
+                
+                <input 
+                  type="text" 
+                  [(ngModel)]="section.heading" 
+                  [name]="'sectionHeading' + i"
+                  placeholder="Заголовок розділу"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+                
+                <textarea 
+                  [(ngModel)]="section.text" 
+                  [name]="'sectionText' + i"
+                  rows="3"
+                  placeholder="Текст розділу"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"></textarea>
+              </div>
+            </div>
+            
+            <div class="flex gap-3">
+              <button 
+                type="button"
+                (click)="resetArticleForm()"
+                class="flex-1 bg-warm-gray-200 hover:bg-warm-gray-300 text-warm-gray-700 py-2 px-4 rounded-lg transition-colors">
+                Скинути
+              </button>
+              <button 
+                type="submit"
+                [disabled]="loading"
+                class="flex-1 bg-bronze-500 hover:bg-bronze-600 disabled:bg-warm-gray-400 text-white py-2 px-4 rounded-lg transition-colors">
+                {{ loading ? 'Збереження...' : (editingArticle ? 'Зберегти зміни' : 'Створити статтю') }}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Articles List -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-bold text-warm-gray-900 mb-4">Всі статті</h3>
+          
+          <div class="space-y-4">
+            <div *ngFor="let article of articles" class="border border-warm-gray-200 rounded-lg p-4">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs bg-bronze-100 text-bronze-800 px-2 py-1 rounded">{{ article.category }}</span>
+                    <span *ngIf="article.published" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Опубліковано</span>
+                    <span *ngIf="!article.published" class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Чернетка</span>
+                  </div>
+                  <h4 class="font-bold text-warm-gray-900 mb-1">{{ article.title }}</h4>
+                  <p class="text-sm text-warm-gray-600 mb-2">{{ article.excerpt }}</p>
+                  <div class="text-xs text-warm-gray-500">
+                    {{ article.date }} • {{ article.readTime }}
+                  </div>
+                </div>
+                
+                <div class="flex gap-2 ml-4">
+                  <button 
+                    (click)="editArticle(article)"
+                    class="bg-bronze-100 hover:bg-bronze-200 text-bronze-700 px-3 py-1 rounded text-sm transition-colors">
+                    Редагувати
+                  </button>
+                  <button 
+                    (click)="deleteArticle(article.id)"
+                    class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm transition-colors">
+                    Видалити
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery Tab -->
+      <div *ngIf="activeTab === 'gallery'" class="space-y-6">
+        <!-- Add/Edit Gallery Image Form -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-bold text-warm-gray-900 mb-4">
+            {{ editingGalleryImage ? 'Редагувати зображення' : 'Нове зображення' }}
+          </h2>
+          
+          <form (ngSubmit)="saveGalleryImage()" class="space-y-4">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Назва</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newGalleryImage.title" 
+                  name="title"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Порядок</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="newGalleryImage.order" 
+                  name="order"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">Опис</label>
+              <textarea 
+                [(ngModel)]="newGalleryImage.description" 
+                name="description"
+                rows="2"
+                class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">URL зображення *</label>
+              <input 
+                type="url" 
+                [(ngModel)]="newGalleryImage.imageUrl" 
+                name="imageUrl"
+                class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent"
+                required>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-warm-gray-700 mb-2">Тип</label>
+                <select 
+                  [(ngModel)]="newGalleryImage.imageType" 
+                  name="imageType"
+                  class="w-full px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+                  <option value="image">Зображення</option>
+                  <option value="video">Відео</option>
+                </select>
+              </div>
+              
+              <div class="flex items-center">
+                <label class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="newGalleryImage.published" 
+                    name="published"
+                    class="mr-2">
+                  <span class="text-sm font-medium text-warm-gray-700">Опубліковано</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- File Upload -->
+            <div>
+              <label class="block text-sm font-medium text-warm-gray-700 mb-2">Завантажити файл</label>
+              <div class="flex gap-3">
+                <input 
+                  type="file" 
+                  id="fileInput"
+                  (change)="onFileSelected($event)"
+                  accept="image/*,video/*"
+                  class="flex-1 px-3 py-2 border border-warm-gray-300 rounded-lg focus:ring-2 focus:ring-bronze-500 focus:border-transparent">
+                <button 
+                  type="button"
+                  (click)="uploadFile()"
+                  [disabled]="!selectedFile || loading"
+                  class="bg-bronze-500 hover:bg-bronze-600 disabled:bg-warm-gray-400 text-white px-4 py-2 rounded-lg transition-colors">
+                  {{ loading ? 'Завантаження...' : 'Завантажити' }}
+                </button>
+              </div>
+              <div *ngIf="uploadError" class="text-red-600 text-sm mt-2">
+                {{ uploadError }}
+              </div>
+            </div>
+            
+            <div class="flex gap-3">
+              <button 
+                type="button"
+                (click)="resetGalleryForm()"
+                class="flex-1 bg-warm-gray-200 hover:bg-warm-gray-300 text-warm-gray-700 py-2 px-4 rounded-lg transition-colors">
+                Скинути
+              </button>
+              <button 
+                type="submit"
+                [disabled]="loading"
+                class="flex-1 bg-bronze-500 hover:bg-bronze-600 disabled:bg-warm-gray-400 text-white py-2 px-4 rounded-lg transition-colors">
+                {{ loading ? 'Збереження...' : (editingGalleryImage ? 'Зберегти зміни' : 'Додати зображення') }}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Gallery Images List -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-bold text-warm-gray-900 mb-4">Всі зображення</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div *ngFor="let image of galleryImages" class="border border-warm-gray-200 rounded-lg p-4">
+              <div class="aspect-video mb-3 rounded-lg overflow-hidden">
+                <img 
+                  *ngIf="image.imageType === 'image'"
+                  [src]="image.imageUrl" 
+                  [alt]="image.title || 'Gallery image'"
+                  class="w-full h-full object-cover">
+                <video 
+                  *ngIf="image.imageType === 'video'"
+                  [src]="image.imageUrl"
+                  class="w-full h-full object-cover"
+                  controls>
+                </video>
+              </div>
+              
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span *ngIf="image.published" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Опубліковано</span>
+                    <span *ngIf="!image.published" class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Приховано</span>
+                    <span class="text-xs bg-warm-gray-100 text-warm-gray-800 px-2 py-1 rounded">{{ image.imageType }}</span>
+                  </div>
+                  <h4 class="font-bold text-warm-gray-900 mb-1">{{ image.title || 'Без назви' }}</h4>
+                  <p class="text-sm text-warm-gray-600 mb-2">{{ image.description || 'Без опису' }}</p>
+                  <div class="text-xs text-warm-gray-500">
+                    Порядок: {{ image.order }}
+                  </div>
+                </div>
+                
+                <div class="flex gap-2 ml-4">
+                  <button 
+                    (click)="editGalleryImage(image)"
+                    class="bg-bronze-100 hover:bg-bronze-200 text-bronze-700 px-3 py-1 rounded text-sm transition-colors">
+                    Редагувати
+                  </button>
+                  <button 
+                    (click)="deleteGalleryImage(image.id)"
+                    class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm transition-colors">
+                    Видалити
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
