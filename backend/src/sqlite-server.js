@@ -10,7 +10,15 @@ const PORT = process.env.PORT || 3001;
 
 // SQLite database setup
 const dbPath = process.env.DATABASE_PATH || './database.sqlite';
-const db = new sqlite3.Database(dbPath);
+console.log('🗄️ SQLite database path:', dbPath);
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('❌ Error opening SQLite database:', err.message);
+  } else {
+    console.log('✅ Connected to SQLite database');
+  }
+});
 
 // File upload configuration
 const uploadDir = process.env.UPLOAD_DIR || './uploads';
@@ -710,12 +718,20 @@ app.post('/api/contact', (req, res) => {
 // Start server
 async function startServer() {
   try {
+    console.log('🔧 Starting SQLite server...');
+    console.log('📊 Environment variables:');
+    console.log('  - PORT:', process.env.PORT);
+    console.log('  - DATABASE_PATH:', process.env.DATABASE_PATH);
+    console.log('  - UPLOAD_DIR:', process.env.UPLOAD_DIR);
+    console.log('  - NODE_ENV:', process.env.NODE_ENV);
+    
     await initializeDatabase();
     
     app.listen(PORT, () => {
       console.log(`🚀 SQLite server running on port ${PORT}`);
       console.log(`📁 Database: ${dbPath}`);
       console.log(`📁 Uploads: ${uploadDir}`);
+      console.log('✅ Server is ready to accept requests');
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
