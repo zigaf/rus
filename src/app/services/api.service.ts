@@ -75,7 +75,7 @@ export interface UploadResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly API_URL = 'https://rus-production.up.railway.app/api';
+  private readonly API_URL = 'https://rus-backend-production.up.railway.app/api';
   private tokenSubject = new BehaviorSubject<string | null>(this.getToken());
   public token$ = this.tokenSubject.asObservable();
 
