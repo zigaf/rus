@@ -1,0 +1,97 @@
+<!-- Articles Section - Full Content with Headers -->
+<section id="articles" class="py-24 bg-warm-gray-50">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-16 animate-fade-in-up">
+      <h2 class="text-4xl md:text-5xl font-serif font-bold text-warm-gray-900 mb-6">
+        Корисна інформація
+      </h2>
+      <div class="h-1 w-32 bg-bronze-500 mx-auto mb-6"></div>
+      <p class="text-xl text-warm-gray-700 max-w-2xl mx-auto">
+        Дізнайтеся більше про профілактику, діагностику та лікування онкологічних захворювань легень
+      </p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up" style="animation-delay: 0.1s;">
+      <button 
+        *ngFor="let category of categories" 
+        (click)="filterByCategory(category)"
+        [class]="selectedCategory === category ? 
+          'bg-bronze-500 text-white px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-lg' : 
+          'bg-white text-warm-gray-700 hover:bg-bronze-50 px-6 py-3 rounded-full font-medium transition-all duration-300 border border-warm-gray-200 hover:border-bronze-300'">
+        {{ category }}
+      </button>
+    </div>
+
+    <!-- Articles Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <article *ngFor="let article of filteredArticles; let i = index" 
+               class="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer animate-fade-in-up"
+               [style.animation-delay]="i * 0.1 + 's'"
+               [routerLink]="['/article', article.id]">
+        <!-- Image -->
+        <div class="aspect-[4/3] overflow-hidden relative">
+          <img [src]="article.image" 
+               [alt]="article.title" 
+               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+          <div class="absolute top-4 left-4 bg-bronze-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+            {{ article.category }}
+          </div>
+          <div class="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs">
+            {{ article.readTime }}
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6">
+          <div class="flex items-center text-warm-gray-500 text-sm mb-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            {{ article.date }}
+          </div>
+          
+          <h3 class="text-xl font-serif font-bold text-warm-gray-900 mb-3 group-hover:text-bronze-600 transition-colors line-clamp-2">
+            {{ article.title }}
+          </h3>
+          
+          <p class="text-warm-gray-600 mb-4 line-clamp-3 leading-relaxed">
+            {{ article.excerpt }}
+          </p>
+          
+          <div class="flex items-center text-bronze-600 font-medium group-hover:translate-x-2 transition-transform duration-300">
+            Читати далі
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Load More Button -->
+    <div class="text-center mt-12 animate-fade-in-up" style="animation-delay: 0.3s;">
+      <button 
+        *ngIf="hasMoreArticles"
+        (click)="loadMoreArticles()"
+        class="bg-bronze-500 hover:bg-bronze-600 text-white px-8 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
+        Завантажити більше
+      </button>
+    </div>
+
+    <!-- No Articles Message -->
+    <div *ngIf="filteredArticles.length === 0" class="text-center py-12 animate-fade-in-up">
+      <div class="text-warm-gray-500 text-lg">
+        <svg class="w-16 h-16 mx-auto mb-4 text-warm-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p>Статті в категорії "{{ selectedCategory }}" не знайдено</p>
+        <button 
+          (click)="filterByCategory('Всі')"
+          class="mt-4 text-bronze-600 hover:text-bronze-700 font-medium">
+          Показати всі статті
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
